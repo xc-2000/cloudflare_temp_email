@@ -19,6 +19,34 @@ res = requests.get(
 
 **Note**: `/api/mails` returns raw RFC822 data by design (for example `source`/`raw`), and it does not guarantee parsed fields such as `subject`, `text`, or `html`. Parse the raw source on the client side (for example with `mail-parser-wasm` or `postal-mime`) if you need readable message content.
 
+## Address Verification Code API
+
+Query the newest verification code candidate for the current mailbox. This endpoint uses the **Address JWT** and can only read the mailbox bound to that JWT, so it is suitable for sharing with a third-party automation script.
+
+```python
+import requests
+
+url = "https://<your-worker-address>/api/mail_code"
+
+querystring = {
+    # optional, default 10, max 50
+    "limit": "10",
+    # optional, default 30, max 1440
+    "minutes": "30",
+}
+
+headers = {
+        "Authorization": "Bearer <address-JWT>",
+        # "x-custom-auth": "<your-website-password>", # If private site password is enabled
+    }
+
+response = requests.get(url, headers=headers, params=querystring)
+
+print(response.json())
+```
+
+Do not give third parties the admin endpoint or admin password. Use `/api/mail_code` with an Address JWT instead.
+
 ## Admin Mail API
 
 Supports `address` filter
@@ -48,6 +76,53 @@ print(response.json())
 **Note**: `/admin/mails` follows the same design as `/api/mails`: it returns stored raw MIME data. If you need readable subject/body, parse the raw content on the client side.
 
 **Note**: Keyword filtering has been removed from the backend API. If you need to filter emails by content, please use the frontend filter input in the UI, which filters the currently displayed page.
+
+## Admin Verification Code API
+
+Query the newest verification code candidate for a mailbox. This endpoint requires admin authentication and scans recent stored mails.
+
+```python
+import requests
+
+url = "https://<your-worker-address>/admin/mail_code"
+
+querystring = {
+    "address": "admin@example.com",
+    # optional, default 10, max 50
+    "limit": "10",
+    # optional, default 30, max 1440
+    "minutes": "30",
+}
+
+headers = {
+        "x-admin-auth": "<your-Admin-password>",
+        # "x-custom-auth": "<your-website-password>", # If private site password is enabled
+    }
+
+response = requests.get(url, headers=headers, params=querystring)
+
+print(response.json())
+```
+
+Successful response example:
+
+```json
+{
+  "success": true,
+  "address": "admin@example.com",
+  "code": "123456",
+  "source": "text",
+  "candidates": [
+    { "code": "123456", "source": "text" }
+  ],
+  "mail": {
+    "id": 1,
+    "from": "Example <no-reply@example.com>",
+    "subject": "Your verification code",
+    "created_at": "2026-06-17 12:00:00"
+  }
+}
+```
 
 ## Admin Delete Mail API
 

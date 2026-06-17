@@ -33,6 +33,11 @@ const router = createRouter({
             component: UserOauth2Callback
         },
         {
+            path: '/code',
+            alias: '/:lang/code',
+            component: () => import('../views/CodeLookup.vue')
+        },
+        {
             path: '/admin',
             alias: '/:lang/admin',
             component: () => import('../views/Admin.vue')

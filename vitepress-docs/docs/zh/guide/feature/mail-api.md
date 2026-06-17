@@ -19,6 +19,34 @@ res = requests.get(
 
 **注意**：`/api/mails` 按设计返回的是原始 RFC822 数据（如 `source`/`raw`），不保证直接包含 `subject`、`text`、`html` 等已解析字段。若要直接读取正文，请在客户端侧解析 `raw`（例如 `mail-parser-wasm`、`postal-mime`）。
 
+## 地址验证码查询 API
+
+查询当前邮箱的最新验证码候选。该接口使用 **Address JWT**，只能读取 JWT 对应的邮箱，适合提供给第三方自动化脚本使用。
+
+```python
+import requests
+
+url = "https://<你的worker地址>/api/mail_code"
+
+querystring = {
+    # 可选，默认 10，最大 50
+    "limit": "10",
+    # 可选，默认 30，最大 1440
+    "minutes": "30",
+}
+
+headers = {
+        "Authorization": "Bearer <地址JWT>",
+        # "x-custom-auth": "<你的网站密码>", # 如果启用了私有站点密码
+    }
+
+response = requests.get(url, headers=headers, params=querystring)
+
+print(response.json())
+```
+
+不要把管理员接口或管理员密码给第三方。给别人用时请使用 `/api/mail_code` 和单个邮箱的 Address JWT。
+
 ## admin 邮件 API
 
 支持 `address` 过滤
@@ -48,6 +76,53 @@ print(response.json())
 **注意**：`/admin/mails` 与 `/api/mails` 一致，返回的是邮件数据库中的 raw MIME 内容；如需正文/主题等可读字段，请在客户端自行解析 `raw`。
 
 **注意**：后端 API 已移除关键词过滤功能。如需按内容过滤邮件，请使用前端界面的过滤输入框，该功能可过滤当前显示的页面。
+
+## admin 验证码查询 API
+
+按邮箱地址查询最新验证码候选。该接口需要管理员鉴权，会扫描最近存储的邮件。
+
+```python
+import requests
+
+url = "https://<你的worker地址>/admin/mail_code"
+
+querystring = {
+    "address": "admin@example.com",
+    # 可选，默认 10，最大 50
+    "limit": "10",
+    # 可选，默认 30，最大 1440
+    "minutes": "30",
+}
+
+headers = {
+        "x-admin-auth": "<你的Admin密码>",
+        # "x-custom-auth": "<你的网站密码>", # 如果启用了私有站点密码
+    }
+
+response = requests.get(url, headers=headers, params=querystring)
+
+print(response.json())
+```
+
+成功响应示例：
+
+```json
+{
+  "success": true,
+  "address": "admin@example.com",
+  "code": "123456",
+  "source": "text",
+  "candidates": [
+    { "code": "123456", "source": "text" }
+  ],
+  "mail": {
+    "id": 1,
+    "from": "Example <no-reply@example.com>",
+    "subject": "Your verification code",
+    "created_at": "2026-06-17 12:00:00"
+  }
+}
+```
 
 ## admin 删除邮件 API
 

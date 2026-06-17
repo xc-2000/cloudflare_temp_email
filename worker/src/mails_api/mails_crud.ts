@@ -5,6 +5,7 @@ import { getBooleanValue } from '../utils';
 import { handleMailListQuery, deleteAddressWithData, updateAddressUpdatedAt } from '../common'
 import { resolveRawEmailRow } from '../gzip'
 import { getSendBalanceState } from './send_balance';
+import { getMailCodeByAddress } from '../mail_code';
 
 const listMails = async (c: Context<HonoCustomType>) => {
     const { address } = c.get("jwtPayload")
@@ -28,6 +29,16 @@ const getMail = async (c: Context<HonoCustomType>) => {
     ).bind(mail_id, address).first();
     if (!result) return c.json(null);
     return c.json(await resolveRawEmailRow(result));
+};
+
+const getMailCode = async (c: Context<HonoCustomType>) => {
+    const { address } = c.get("jwtPayload")
+    if (!address) {
+        return c.json({ "error": "No address" }, 400)
+    }
+    const { limit, minutes } = c.req.query();
+    updateAddressUpdatedAt(c, address);
+    return getMailCodeByAddress(c, address, { limit, minutes });
 };
 
 const deleteMail = async (c: Context<HonoCustomType>) => {
@@ -117,4 +128,4 @@ const clearSentItems = async (c: Context<HonoCustomType>) => {
     return c.json({ success });
 };
 
-export default { listMails, getMail, deleteMail, getSettings, deleteAddress, clearInbox, clearSentItems };
+export default { listMails, getMail, getMailCode, deleteMail, getSettings, deleteAddress, clearInbox, clearSentItems };

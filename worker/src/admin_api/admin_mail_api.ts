@@ -1,5 +1,6 @@
 import { Context } from "hono";
 import { handleMailListQuery } from "../common";
+import { getMailCodeByAddress } from "../mail_code";
 
 export default {
     getMails: async (c: Context<HonoCustomType>) => {
@@ -32,5 +33,12 @@ export default {
         return c.json({
             success: success
         })
+    },
+    getMailCode: async (c: Context<HonoCustomType>) => {
+        const { address, limit, minutes } = c.req.query();
+        if (!address) {
+            return c.json({ error: "address is required" }, 400);
+        }
+        return getMailCodeByAddress(c, address, { limit, minutes });
     }
 }

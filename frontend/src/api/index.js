@@ -70,6 +70,36 @@ const apiFetch = async (path, options = {}) => {
     }
 }
 
+const fetchAddressMailCode = async (addressJwt, options = {}) => {
+    loading.value = true;
+    try {
+        const fingerprint = await getFingerprint();
+        const headers = {
+            'x-lang': i18n.global.locale.value,
+            'x-fingerprint': fingerprint,
+            'Content-Type': 'application/json',
+        };
+        const customAuthHeader = safeHeaderValue(auth.value);
+        if (customAuthHeader) headers['x-custom-auth'] = customAuthHeader;
+        const authorizationHeader = safeBearerHeader(addressJwt);
+        if (authorizationHeader) headers['Authorization'] = authorizationHeader;
+
+        const params = new URLSearchParams();
+        if (options.limit) params.set('limit', String(options.limit));
+        if (options.minutes) params.set('minutes', String(options.minutes));
+        const response = await instance.request(`/api/mail_code?${params.toString()}`, {
+            method: 'GET',
+            headers,
+        });
+        if (response.status >= 300) {
+            throw new Error(`[${response.status}]: ${response.data}` || "error");
+        }
+        return response.data;
+    } finally {
+        loading.value = false;
+    }
+}
+
 const getOpenSettings = async (message, notification) => {
     try {
         const res = await api.fetch("/open_api/settings");
@@ -219,6 +249,7 @@ const bindUserAddress = async () => {
 
 export const api = {
     fetch: apiFetch,
+    fetchAddressMailCode,
     getSettings,
     getOpenSettings,
     getUserOpenSettings,
