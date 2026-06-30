@@ -58,10 +58,6 @@ jobs:
             cp wrangler.toml.template wrangler.toml
           fi
 
-          if [ -n "$ADMIN_PASSWORDS" ]; then
-            node -e 'const fs = require("fs"); const path = "wrangler.toml"; let text = fs.readFileSync(path, "utf8"); const raw = (process.env.ADMIN_PASSWORDS || "").trim(); if (!raw) process.exit(0); let passwords; try { const parsed = JSON.parse(raw); passwords = Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string" && item) : [raw]; } catch { passwords = [raw]; } const replacement = `ADMIN_PASSWORDS = ${JSON.stringify(passwords)}`; const pattern = /^\s*ADMIN_PASSWORDS\s*=.*$/m; if (pattern.test(text)) { text = text.replace(pattern, replacement); } else { const anchor = /^\s*JWT_SECRET\s*=.*$/m.exec(text); text = anchor ? text.slice(0, anchor.index + anchor[0].length) + "\n" + replacement + text.slice(anchor.index + anchor[0].length) : text.trimEnd() + "\n" + replacement + "\n"; } fs.writeFileSync(path, text, "utf8");'
-          fi
-          
           pnpm install --no-frozen-lockfile
 
           if [ -n "$use_mail_wasm_parser" ]; then
@@ -89,5 +85,4 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           WRANGLER_TOML_CONTENT: ${{ secrets.BACKEND_TOML }}
-          ADMIN_PASSWORDS: ${{ secrets.ADMIN_PASSWORDS }}
           CI: true
