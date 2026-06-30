@@ -16,6 +16,7 @@
 
 ### Bug Fixes
 
+- fix: |CI| 补充 `Deploy Backend` 的 pnpm 构建脚本白名单与模板初始化，避免 GitHub Actions 因未批准的依赖构建脚本或缺失 `wrangler.toml` 失败
 - fix: |CI| 调整 `Deploy Backend` workflow，支持仅配置 `ADMIN_PASSWORDS` 也能注入后端管理员密码，避免后台登录继续返回 401
 - fix: |CI| 调整 GitHub Pages 前端 workflow，在构建前先写入 FRONTEND_ENV 到 .env.pages，让 GitHub Pages 部署也能直接指向 Worker 后端，而不是依赖 Page Functions
 - fix: |Admin| 管理员重置邮箱地址密码时改为前端 SHA-256 后提交，后端只接受并存储哈希值，避免该接口继续接收明文密码

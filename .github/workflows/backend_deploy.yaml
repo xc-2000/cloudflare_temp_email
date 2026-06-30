@@ -27,7 +27,7 @@ jobs:
         name: Install pnpm
         id: pnpm-install
         with:
-          version: 10
+          version: 10.32.0
           run_install: false
 
       - name: Deploy Backend for ${{ github.ref_name }}
@@ -73,11 +73,13 @@ jobs:
           if [ "$debug_mode" = "true" ]; then
             pnpm run deploy
           else
-            if pnpm run deploy >/dev/null 2>&1; then
+            log_file=$(mktemp)
+            if pnpm run deploy 2>&1 | tee "$log_file" >/dev/null; then
               echo "Deploy succeeded"
             else
               code=$?
               echo "Command failed with exit code $code"
+              cat "$log_file"
               exit "$code"
             fi
           fi
@@ -87,3 +89,4 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           WRANGLER_TOML_CONTENT: ${{ secrets.BACKEND_TOML }}
           ADMIN_PASSWORDS: ${{ secrets.ADMIN_PASSWORDS }}
+          CI: true
