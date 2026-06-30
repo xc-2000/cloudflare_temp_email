@@ -36,15 +36,15 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
-          if [ -n "${{ secrets.FRONTEND_ENV }}" ]; then
-            cat <<'EOF' > .env.pages
-${{ secrets.FRONTEND_ENV }}
-EOF
+          if [ -n "$FRONTEND_ENV" ]; then
+            printf '%s\n' "$FRONTEND_ENV" > .env.pages
           fi
           pnpm install --no-frozen-lockfile
           pnpm run build:pages
           cp ../CNAME dist/CNAME
           cp dist/index.html dist/404.html
+        env:
+          FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
