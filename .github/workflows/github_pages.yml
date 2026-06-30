@@ -36,18 +36,10 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
-          if [ -z "$FRONTEND_ENV" ]; then
-            echo "FRONTEND_ENV is required. Set it to the frontend env file content, including VITE_API_BASE." >&2
-            exit 1
-          fi
-          cp .env.pages .env.prod
-          printf '%s\n' "$FRONTEND_ENV" > .env.prod
           pnpm install --no-frozen-lockfile
           pnpm run build:pages
           cp ../CNAME dist/CNAME
           cp dist/index.html dist/404.html
-        env:
-          FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
