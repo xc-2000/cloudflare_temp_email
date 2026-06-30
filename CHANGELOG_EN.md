@@ -16,6 +16,8 @@
 
 ### Bug Fixes
 
+- fix: |CI| Update the GitHub Pages frontend workflow to write `FRONTEND_ENV` into `.env.pages` before building, so GitHub Pages deployments can point directly at the Worker backend instead of relying on Page Functions
+
 - fix: |Admin| Hash address passwords in the frontend before admin reset requests, and make the backend accept and store only the hash instead of plaintext
 - fix: |Address| Stop returning stored address password hashes from the admin address list and user bound-address list APIs to avoid exposing sensitive fields
 - fix: |Address| Normalize whitespace and casing for configured domains, inbound recipient domains, and prefixes across `DOMAINS`, `DEFAULT_DOMAINS`, `USER_ROLES.domains`, random subdomains, forwarding rules, SMTP, and `SEND_MAIL` domain matching, preserve blank-domain catch-all forwarding rules, and clarify that empty `DEFAULT_DOMAINS` / role domains fall back to `DOMAINS`, to avoid create, receive, forward, or send failures caused by mixed-case configuration or inbound recipient domains (issue #926)

@@ -36,7 +36,11 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
-          cp .env.pages .env.prod
+          if [ -n "${{ secrets.FRONTEND_ENV }}" ]; then
+            cat <<'EOF' > .env.pages
+${{ secrets.FRONTEND_ENV }}
+EOF
+          fi
           pnpm install --no-frozen-lockfile
           pnpm run build:pages
           cp ../CNAME dist/CNAME

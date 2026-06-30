@@ -1,5 +1,7 @@
 # Cloudflare Pages 前端
 
+> 如果你的前端实际部署在 GitHub Pages，而不是 Cloudflare Pages，这里不要使用 Page Functions 反代；请直接把 VITE_API_BASE / FRONTEND_ENV 设成后端 Worker 的根地址。
+
 <script setup>
 import { ref } from 'vue'
 import JSZip from 'jszip';

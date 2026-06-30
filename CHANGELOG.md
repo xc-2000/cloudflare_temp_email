@@ -16,6 +16,7 @@
 
 ### Bug Fixes
 
+- fix: |CI| 调整 GitHub Pages 前端 workflow，在构建前先写入 FRONTEND_ENV 到 .env.pages，让 GitHub Pages 部署也能直接指向 Worker 后端，而不是依赖 Page Functions
 - fix: |Admin| 管理员重置邮箱地址密码时改为前端 SHA-256 后提交，后端只接受并存储哈希值，避免该接口继续接收明文密码
 - fix: |Address| 管理员邮箱地址列表与用户绑定地址列表不再返回已存储的地址密码哈希值，避免列表接口暴露敏感字段
 - fix: |Address| 统一规范化配置域名、收件地址域名与前缀的空白和大小写，覆盖 `DOMAINS`、`DEFAULT_DOMAINS`、`USER_ROLES.domains`、随机子域名、转发规则、SMTP 与 `SEND_MAIL` 域名匹配，保留转发规则空域名 catch-all 行为，并明确空 `DEFAULT_DOMAINS` / 角色域名回退到 `DOMAINS` 的行为，避免大小写配置或入站收件域名导致创建、收件、转发或发信失败（issue #926）

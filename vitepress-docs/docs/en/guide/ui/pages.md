@@ -1,5 +1,7 @@
 # Cloudflare Pages Frontend
 
+> If you deploy the frontend on GitHub Pages instead of Cloudflare Pages, do not use Page Functions here. Set `VITE_API_BASE` / `FRONTEND_ENV` directly to the root URL of your Worker backend.
+
 <script setup>
 import { ref } from 'vue'
 import JSZip from 'jszip';
