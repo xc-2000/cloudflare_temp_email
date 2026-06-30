@@ -14,6 +14,21 @@ type VerificationCodeCandidate = {
     source: "metadata" | "subject" | "text" | "html";
 }
 
+type MailCodeResult = {
+    success: boolean;
+    address: string;
+    code: string | null;
+    source?: VerificationCodeCandidate["source"];
+    candidates: VerificationCodeCandidate[];
+    scanned?: number;
+    mail?: {
+        id: number;
+        from: string;
+        subject: string;
+        created_at?: string;
+    };
+}
+
 const parsePositiveInt = (
     value: string | undefined,
     defaultValue: number,
@@ -130,21 +145,26 @@ const extractCodesFromMail = async (row: RawMailRow): Promise<{
     };
 }
 
-export const getMailCodeByAddress = async (
-    c: Context<HonoCustomType>,
+export const findMailCodeByAddress = async (
+    db: D1Database,
     address: string,
     options: {
         limit?: string;
         minutes?: string;
     } = {}
-): Promise<Response> => {
+): Promise<MailCodeResult> => {
     const normalizedAddress = address.trim().toLowerCase();
     if (!normalizedAddress) {
-        return c.json({ error: "address is required" }, 400);
+        return {
+            success: false,
+            address: normalizedAddress,
+            code: null,
+            candidates: [],
+        };
     }
     const queryLimit = parsePositiveInt(options.limit, DEFAULT_CODE_QUERY_LIMIT, MAX_CODE_QUERY_LIMIT);
     const queryMinutes = parsePositiveInt(options.minutes, DEFAULT_CODE_QUERY_MINUTES, MAX_CODE_QUERY_MINUTES);
-    const { results } = await c.env.DB.prepare(
+    const { results } = await db.prepare(
         `SELECT * FROM raw_mails`
         + ` WHERE lower(address) = ?`
         + ` AND created_at >= datetime('now', ?)`
@@ -154,7 +174,7 @@ export const getMailCodeByAddress = async (
     for (const row of results) {
         const extracted = await extractCodesFromMail(row);
         if (extracted.candidates.length > 0) {
-            return c.json({
+            return {
                 success: true,
                 address: normalizedAddress,
                 code: extracted.candidates[0].code,
@@ -166,15 +186,29 @@ export const getMailCodeByAddress = async (
                     subject: extracted.subject,
                     created_at: row.created_at,
                 },
-            });
+            };
         }
     }
 
-    return c.json({
+    return {
         success: false,
         address: normalizedAddress,
         code: null,
         candidates: [],
         scanned: results.length,
-    });
+    };
+}
+
+export const getMailCodeByAddress = async (
+    c: Context<HonoCustomType>,
+    address: string,
+    options: {
+        limit?: string;
+        minutes?: string;
+    } = {}
+): Promise<Response> => {
+    if (!address.trim()) {
+        return c.json({ error: "address is required" }, 400);
+    }
+    return c.json(await findMailCodeByAddress(c.env.DB, address, options));
 }

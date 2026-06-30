@@ -31,6 +31,20 @@ test.describe('Admin New Address', () => {
     expect(body.address_id).toBeGreaterThan(0);
   });
 
+  test('returns a specific duplicate-address error for admin create', async ({ request }) => {
+    const uniqueName = `admindup${Date.now()}`;
+    const firstRes = await request.post(`${WORKER_URL}/admin/new_address`, {
+      data: { name: uniqueName, domain: TEST_DOMAIN },
+    });
+    expect(firstRes.ok()).toBe(true);
+
+    const secondRes = await request.post(`${WORKER_URL}/admin/new_address`, {
+      data: { name: uniqueName, domain: TEST_DOMAIN },
+    });
+    expect(secondRes.ok()).toBe(false);
+    expect(await secondRes.text()).toContain('Address already exists');
+  });
+
   test('falls back to domains when default domains is empty', async ({ request }) => {
     const uniqueName = `fallback${Date.now().toString(36)}`;
     const res = await request.post(`${WORKER_URL}/api/new_address`, {

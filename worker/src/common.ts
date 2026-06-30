@@ -119,6 +119,17 @@ const allowRandomSubdomainForDomain = (
         .includes(normalizedDomain);
 }
 
+const isExpectedAddressCreateError = (message: string, msgs: ReturnType<typeof i18n.getMessagesbyContext>): boolean => {
+    return [
+        msgs.NameTooShortMsg,
+        msgs.NameTooLongMsg,
+        msgs.InvalidDomainMsg,
+        msgs.RandomSubdomainNotAllowedMsg,
+        msgs.AddressAlreadyExistsMsg,
+    ].some((item) => message.startsWith(item))
+        || message.startsWith('Name[') && message.endsWith('is blocked');
+}
+
 const isCreateAddressSubdomainMatchEnvConfigured = (c: Context<HonoCustomType>): boolean => {
     return c.env.ENABLE_CREATE_ADDRESS_SUBDOMAIN_MATCH !== undefined
         && c.env.ENABLE_CREATE_ADDRESS_SUBDOMAIN_MATCH !== null
@@ -437,6 +448,9 @@ export const newAddress = async (
                     continue;
                 }
                 throw new Error(msgs.AddressAlreadyExistsMsg)
+            }
+            if (message && isExpectedAddressCreateError(message, msgs)) {
+                throw e;
             }
             throw new Error(msgs.FailedCreateAddressMsg)
         }

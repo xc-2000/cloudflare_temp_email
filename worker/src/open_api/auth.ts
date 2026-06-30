@@ -3,8 +3,34 @@ import { Jwt } from 'hono/utils/jwt'
 
 import utils, { checkCfTurnstile, getPasswords, getAdminPasswords, hashPassword } from '../utils';
 import i18n from '../i18n';
+import { findMailCodeByAddress } from '../mail_code';
 
 const api = new Hono<HonoCustomType>()
+
+api.get('/open_api/mail_code', async (c) => {
+    const { token, limit, minutes, format } = c.req.query();
+    const msgs = i18n.getMessagesbyContext(c);
+    if (!token) {
+        return c.text(msgs.InvalidAddressCredentialMsg, 401)
+    }
+    try {
+        const payload = await Jwt.verify(token, c.env.JWT_SECRET, "HS256");
+        const address = typeof payload.address === "string" ? payload.address : "";
+        if (!address) {
+            return c.text(msgs.InvalidAddressCredentialMsg, 401)
+        }
+        const result = await findMailCodeByAddress(c.env.DB, address, { limit, minutes });
+        if (format === "json") {
+            return c.json(result);
+        }
+        if (!result.success || !result.code) {
+            return c.text("", 404);
+        }
+        return c.text(result.code);
+    } catch (error) {
+        return c.text(msgs.InvalidAddressCredentialMsg, 401)
+    }
+})
 
 api.post('/open_api/site_login', async (c) => {
     const { password, cf_token } = await c.req.json();

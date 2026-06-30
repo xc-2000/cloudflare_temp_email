@@ -23,6 +23,7 @@
 | `GitHub OAuth 无法获取到邮箱` / `[400]: 从 Oauth2 提供商获取用户邮箱失败` | GitHub 模板会从 `https://api.github.com/user` 的 `email` 字段读取邮箱。GitHub 账号如果隐藏公开邮箱，该字段会是 `null`。可以在 GitHub 个人资料中选择 `Public email`，或把 `User Info URL` 改为 `https://api.github.com/user/emails`、`User Email Key` 改为 `$[?(@.primary==true)].email`、`Scope` 改为 `user:email` |
 | 页面初始化时报 `Cannot read properties of undefined (reading 'map')` | 先看 `/open_api/settings` 返回是否正常。如果是 Worker 直连部署，通常是 worker 变量没有设置成功，请检查 `DOMAINS`、`ADMIN_PASSWORDS` 等 JSON 格式变量是否正确配置；如果是 Pages 前端部署并且请求打到了错误地址，则继续看下方 Pages 相关排障 |
 | 后端 Worker 页面打开是 `OK`，但前端所有请求都是 `Network Error` | 先在浏览器无痕模式打开前端，排除旧前端包缓存。再确认 Cloudflare 没有对 API 域名开启 Under Attack、Bot Fight、Managed Challenge 等需要浏览器挑战的安全策略；这些挑战会拦截 XHR/API 请求并表现为 `Network Error` |
+| Pages 前端访问 `/admin` 时，`/open_api/settings` 在 DevTools 里报 `CORS error` 或接口返回 `429 error code 1027` | 不要让前端直连 `https://api.xlyyds.cloud`。应使用 Pages Functions 反代后端，让前端走同域请求；部署 `frontend/.env.pages` 时把 `VITE_API_BASE` 置空，并确认 `pages/functions/_middleware.js` 已把 `/admin/*`、`/open_api/*` 等路径转发到 `BACKEND` |
 | 邮件突然收不到，删除几封邮件后恢复，Worker 日志出现 `D1_ERROR: Exceeded maximum DB size` | D1 单数据库达到容量上限后无法继续写入 `raw_mails`。请清理旧邮件、开启 admin 后台自动清理，并确认 Worker 的 `Settings -> Trigger Events -> Cron Triggers` 已添加定时触发器，否则后台清理配置不会自动执行 |
 
 ## Pages 相关
