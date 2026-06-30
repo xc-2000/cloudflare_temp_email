@@ -40,7 +40,8 @@ jobs:
             echo "FRONTEND_ENV is required. Set it to the frontend env file content, including VITE_API_BASE." >&2
             exit 1
           fi
-          printf '%s\n' "$FRONTEND_ENV" > .env.pages
+          cp .env.pages .env.prod
+          printf '%s\n' "$FRONTEND_ENV" > .env.prod
           pnpm install --no-frozen-lockfile
           pnpm run build:pages
           cp ../CNAME dist/CNAME
