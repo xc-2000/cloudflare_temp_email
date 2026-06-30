@@ -1,4 +1,4 @@
-<!-- markdownlint-disable-file MD004 MD024 MD033 MD034 MD036 -->
+﻿<!-- markdownlint-disable-file MD004 MD024 MD033 MD034 MD036 -->
 # CHANGE LOG
 
 <p align="center">
@@ -21,6 +21,7 @@
 - fix: |CI| Update the `Deploy Backend` workflow so it preserves an already configured `wrangler.toml` in the repository, preventing deployment from overwriting `DOMAINS` / `JWT_SECRET` / `ADMIN_PASSWORDS` with the template
 - fix: |CI| Remove `ADMIN_PASSWORDS` Secret injection from the `Deploy Backend` workflow so backend admin passwords come only from the repository `worker/wrangler.toml`
 - fix: |CI| Remove `BACKEND_TOML` Secret override injection from the `Deploy Backend` workflow so backend deployment uses only the repository `worker/wrangler.toml`
+- fix: |Frontend| Switch the default backend URL in `frontend/.env.pages` to `https://api.xlyyds.cloud` so Pages builds stop pointing at the old `temp-email-api.awsl.uk`
 - fix: |CI| Update the GitHub Pages frontend workflow to write `FRONTEND_ENV` into `.env.pages` before building, so GitHub Pages deployments can point directly at the Worker backend instead of relying on Page Functions
 
 - fix: |Admin| Hash address passwords in the frontend before admin reset requests, and make the backend accept and store only the hash instead of plaintext
