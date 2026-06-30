@@ -58,41 +58,7 @@ jobs:
           fi
 
           if [ -n "$ADMIN_PASSWORDS" ]; then
-            python - <<'PY'
-              from pathlib import Path
-              import json
-              import os
-              import re
-
-              path = Path("wrangler.toml")
-              text = path.read_text(encoding="utf-8")
-              raw = os.environ["ADMIN_PASSWORDS"].strip()
-              if not raw:
-                  raise SystemExit(0)
-
-              try:
-                  parsed = json.loads(raw)
-                  if isinstance(parsed, list):
-                      passwords = [item for item in parsed if isinstance(item, str) and item]
-                  else:
-                      passwords = [raw]
-              except Exception:
-                  passwords = [raw]
-
-              replacement = f"ADMIN_PASSWORDS = {json.dumps(passwords, ensure_ascii=False)}"
-              pattern = re.compile(r"(?m)^\s*ADMIN_PASSWORDS\s*=.*$")
-              if pattern.search(text):
-                  text = pattern.sub(replacement, text, count=1)
-              else:
-                  anchor = re.search(r"(?m)^\s*JWT_SECRET\s*=.*$", text)
-                  if anchor:
-                      insert_at = anchor.end()
-                      text = text[:insert_at] + "\n" + replacement + text[insert_at:]
-                  else:
-                      text = text.rstrip() + "\n" + replacement + "\n"
-
-              path.write_text(text, encoding="utf-8")
-            PY
+            node -e 'const fs = require("fs"); const path = "wrangler.toml"; let text = fs.readFileSync(path, "utf8"); const raw = (process.env.ADMIN_PASSWORDS || "").trim(); if (!raw) process.exit(0); let passwords; try { const parsed = JSON.parse(raw); passwords = Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string" && item) : [raw]; } catch { passwords = [raw]; } const replacement = `ADMIN_PASSWORDS = ${JSON.stringify(passwords)}`; const pattern = /^\s*ADMIN_PASSWORDS\s*=.*$/m; if (pattern.test(text)) { text = text.replace(pattern, replacement); } else { const anchor = /^\s*JWT_SECRET\s*=.*$/m.exec(text); text = anchor ? text.slice(0, anchor.index + anchor[0].length) + "\n" + replacement + text.slice(anchor.index + anchor[0].length) : text.trimEnd() + "\n" + replacement + "\n"; } fs.writeFileSync(path, text, "utf8");'
           fi
           
           pnpm install --no-frozen-lockfile
