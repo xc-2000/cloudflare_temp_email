@@ -52,9 +52,10 @@ jobs:
           export use_mail_wasm_parser=${{ secrets.BACKEND_USE_MAIL_WASM_PARSER }}
           
           cd worker/
-          cp wrangler.toml.template wrangler.toml
           if [ -n "$WRANGLER_TOML_CONTENT" ]; then
             printf '%s\n' "$WRANGLER_TOML_CONTENT" > wrangler.toml
+          elif [ ! -f wrangler.toml ]; then
+            cp wrangler.toml.template wrangler.toml
           fi
 
           if [ -n "$ADMIN_PASSWORDS" ]; then
