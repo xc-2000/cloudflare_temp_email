@@ -33,6 +33,7 @@ Then go to the repository page `Settings` -> `Secrets and variables` -> `Actions
    | Name                           | Description                                                                                                                                    |
    | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
    | `BACKEND_TOML`                 | Backend configuration file, [see here](/en/guide/cli/worker.html#modify-wrangler-toml-configuration-file)                                      |
+   | `ADMIN_PASSWORDS`              | (Optional) Admin console passwords as a JSON array string, for example `["xlyyds"]`. If you only want to change the admin password, you do not need to maintain a full `BACKEND_TOML`; the workflow will merge it into the current `wrangler.toml` |
    | `DEBUG_MODE`                   | (Optional) Whether to enable debug mode, set to `true` to enable. By default, worker deployment logs are not output to GitHub Actions page, enabling this will output them |
    | `BACKEND_USE_MAIL_WASM_PARSER` | (Optional) Whether to use WASM to parse emails, set to `true` to enable. For features, refer to [Configure Worker to use WASM Email Parser](/en/guide/feature/mail_parser_wasm_worker) |
    | `USE_WORKER_ASSETS`            | (Optional) Deploy Worker with frontend assets, set to `true` to enable                                                                         |

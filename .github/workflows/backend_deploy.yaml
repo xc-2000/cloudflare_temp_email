@@ -52,8 +52,48 @@ jobs:
           export use_mail_wasm_parser=${{ secrets.BACKEND_USE_MAIL_WASM_PARSER }}
           
           cd worker/
-          # ✅ 修复核心：使用环境变量写入，避免 Shell 解析特殊字符
-          printf '%s\n' "$WRANGLER_TOML_CONTENT" > wrangler.toml
+          cp wrangler.toml wrangler.toml.bak
+          if [ -n "$WRANGLER_TOML_CONTENT" ]; then
+            printf '%s\n' "$WRANGLER_TOML_CONTENT" > wrangler.toml
+          fi
+
+          if [ -n "$ADMIN_PASSWORDS" ]; then
+            python - <<'PY'
+              from pathlib import Path
+              import json
+              import os
+              import re
+
+              path = Path("wrangler.toml")
+              text = path.read_text(encoding="utf-8")
+              raw = os.environ["ADMIN_PASSWORDS"].strip()
+              if not raw:
+                  raise SystemExit(0)
+
+              try:
+                  parsed = json.loads(raw)
+                  if isinstance(parsed, list):
+                      passwords = [item for item in parsed if isinstance(item, str) and item]
+                  else:
+                      passwords = [raw]
+              except Exception:
+                  passwords = [raw]
+
+              replacement = f"ADMIN_PASSWORDS = {json.dumps(passwords, ensure_ascii=False)}"
+              pattern = re.compile(r"(?m)^\s*ADMIN_PASSWORDS\s*=.*$")
+              if pattern.search(text):
+                  text = pattern.sub(replacement, text, count=1)
+              else:
+                  anchor = re.search(r"(?m)^\s*JWT_SECRET\s*=.*$", text)
+                  if anchor:
+                      insert_at = anchor.end()
+                      text = text[:insert_at] + "\n" + replacement + text[insert_at:]
+                  else:
+                      text = text.rstrip() + "\n" + replacement + "\n"
+
+              path.write_text(text, encoding="utf-8")
+            PY
+          fi
           
           pnpm install --no-frozen-lockfile
 
@@ -79,5 +119,5 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          # ✅ 将 secret 映射到环境变量中
           WRANGLER_TOML_CONTENT: ${{ secrets.BACKEND_TOML }}
+          ADMIN_PASSWORDS: ${{ secrets.ADMIN_PASSWORDS }}

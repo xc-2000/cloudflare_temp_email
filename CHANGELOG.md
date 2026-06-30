@@ -16,6 +16,7 @@
 
 ### Bug Fixes
 
+- fix: |CI| 调整 `Deploy Backend` workflow，支持仅配置 `ADMIN_PASSWORDS` 也能注入后端管理员密码，避免后台登录继续返回 401
 - fix: |CI| 调整 GitHub Pages 前端 workflow，在构建前先写入 FRONTEND_ENV 到 .env.pages，让 GitHub Pages 部署也能直接指向 Worker 后端，而不是依赖 Page Functions
 - fix: |Admin| 管理员重置邮箱地址密码时改为前端 SHA-256 后提交，后端只接受并存储哈希值，避免该接口继续接收明文密码
 - fix: |Address| 管理员邮箱地址列表与用户绑定地址列表不再返回已存储的地址密码哈希值，避免列表接口暴露敏感字段
