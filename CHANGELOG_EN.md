@@ -20,6 +20,7 @@
 - fix: |CI| Update the `Deploy Backend` workflow so `ADMIN_PASSWORDS` alone can inject backend admin passwords, preventing admin login from still returning 401
 - fix: |CI| Update the `Deploy Backend` workflow so it preserves an already configured `wrangler.toml` in the repository, preventing deployment from overwriting `DOMAINS` / `JWT_SECRET` / `ADMIN_PASSWORDS` with the template
 - fix: |CI| Remove `ADMIN_PASSWORDS` Secret injection from the `Deploy Backend` workflow so backend admin passwords come only from the repository `worker/wrangler.toml`
+- fix: |CI| Remove `BACKEND_TOML` Secret override injection from the `Deploy Backend` workflow so backend deployment uses only the repository `worker/wrangler.toml`
 - fix: |CI| Update the GitHub Pages frontend workflow to write `FRONTEND_ENV` into `.env.pages` before building, so GitHub Pages deployments can point directly at the Worker backend instead of relying on Page Functions
 
 - fix: |Admin| Hash address passwords in the frontend before admin reset requests, and make the backend accept and store only the hash instead of plaintext

@@ -20,6 +20,7 @@
 - fix: |CI| 调整 `Deploy Backend` workflow，支持仅配置 `ADMIN_PASSWORDS` 也能注入后端管理员密码，避免后台登录继续返回 401
 - fix: |CI| 调整 `Deploy Backend` workflow 的 `wrangler.toml` 生成逻辑，优先保留仓库内已配置的 Worker 文件，避免部署时把 `DOMAINS` / `JWT_SECRET` / `ADMIN_PASSWORDS` 覆盖成模板
 - fix: |CI| 移除 `Deploy Backend` workflow 对 `ADMIN_PASSWORDS` Secret 的注入，后端管理员密码仅以仓库内 `worker/wrangler.toml` 为准
+- fix: |CI| 移除 `Deploy Backend` workflow 对 `BACKEND_TOML` Secret 的覆盖注入，后端部署只使用仓库内 `worker/wrangler.toml`
 - fix: |CI| 调整 GitHub Pages 前端 workflow，在构建前先写入 FRONTEND_ENV 到 .env.pages，让 GitHub Pages 部署也能直接指向 Worker 后端，而不是依赖 Page Functions
 - fix: |Admin| 管理员重置邮箱地址密码时改为前端 SHA-256 后提交，后端只接受并存储哈希值，避免该接口继续接收明文密码
 - fix: |Address| 管理员邮箱地址列表与用户绑定地址列表不再返回已存储的地址密码哈希值，避免列表接口暴露敏感字段
